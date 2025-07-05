@@ -1,0 +1,310 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bond of Friendship</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }header {
+  text-align: center;
+  padding: 30px;
+  font-size: 2.5rem;
+  background-color: rgba(255, 182, 193, 0.8);
+  animation: fadeIn 2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.message-box {
+  max-width: 600px;
+  margin: 40px auto;
+  background: #fff0f5;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 15px rgba(255, 105, 180, 0.3);
+  text-align: center;
+  animation: bounceIn 1.5s ease;
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.btn {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #ff69b4;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #ff1493;
+}
+
+.game-container {
+  max-width: 500px;
+  margin: 50px auto;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 80px);
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.card {
+  width: 80px;
+  height: 80px;
+  background-color: black;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: background 0.3s, color 0.3s;
+}
+
+.card.flipped {
+  background-color: #f06292;
+  color: white;
+}
+
+#gameScreen {
+  display: none;
+  text-align: center;
+  padding: 30px;
+}
+
+#ticTacToeBoard {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-gap: 5px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.cell {
+  width: 100px;
+  height: 100px;
+  font-size: 2rem;
+  background: #fff0f5;
+  border: 2px solid #f06292;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+  </style>
+</head>
+<body>  <div id="mainPage">
+    <header>💖 Our Special Friendship 💖</header><div class="message-box">
+  <p>Hey Krishnendu,</p>
+  <p>This little page is for you – a reflection of our bond, our fun, and our unforgettable memories 💕</p>
+  <button class="btn" onclick="alert('You mean a lot to me! 😊')">Tap Me</button>
+  <button class="btn" onclick="launchGame()">Play TIC TAC TOE</button>
+</div>
+
+<div class="game-container">
+  <h2>🎮 Friendship Memory Game</h2>
+  <p>Match all the pairs and unlock a secret!</p>
+  <div class="grid" id="gameBoard"></div>
+</div>
+
+  </div>  <div id="gameScreen">
+    <h2 id="gameTitle"></h2>
+    <canvas id="heartCanvas" width="400" height="300" style="display:none"></canvas>
+    <div id="ticTacToeBoard" style="display:none"></div>
+  </div>  <script>
+    // Memory Game
+    const emojis = ['💐', '🎂', '🎉', '📷', '🎶', '💖', '🍫', '🐻'];
+    let cards = [...emojis, ...emojis];
+    let flipped = [];
+    let matched = 0;
+    const board = document.getElementById('gameBoard');
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function createCard(emoji, index) {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      card.dataset.emoji = emoji;
+      card.dataset.index = index;
+      card.onclick = () => flipCard(card);
+      board.appendChild(card);
+    }
+
+    function flipCard(card) {
+      if (card.classList.contains('flipped') || flipped.length === 2) return;
+      card.classList.add('flipped');
+      card.textContent = card.dataset.emoji;
+      flipped.push(card);
+
+      if (flipped.length === 2) {
+        const [first, second] = flipped;
+        if (first.dataset.emoji === second.dataset.emoji) {
+          matched++;
+          flipped = [];
+          if (matched === emojis.length) {
+            setTimeout(() => {
+              alert('🎉 You were always a good friend! 🥰');
+            }, 500);
+          }
+        } else {
+          setTimeout(() => {
+            flipped.forEach(c => {
+              c.classList.remove('flipped');
+              c.textContent = '';
+            });
+            flipped = [];
+          }, 800);
+        }
+      }
+    }
+
+    function initGame() {
+      shuffle(cards);
+      board.innerHTML = '';
+      cards.forEach((emoji, i) => createCard(emoji, i));
+    }
+
+    initGame();
+
+    function launchGame() {
+      document.getElementById('mainPage').style.display = 'none';
+      document.getElementById('gameScreen').style.display = 'block';
+
+      if (window.innerWidth <= 768) {
+        launchTicTacToe();
+      } else {
+        launchHeartGame();
+      }
+    }
+
+    // Heart Collector Game
+    function launchHeartGame() {
+      document.getElementById('gameTitle').textContent = '💖 Heart Collector';
+      const canvas = document.getElementById('heartCanvas');
+      canvas.style.display = 'block';
+      const ctx = canvas.getContext('2d');
+      let basket = { x: 170, y: 270, width: 60, height: 20 };
+      let hearts = [], score = 0;
+      for (let i = 0; i < 5; i++) {
+        hearts.push({ x: Math.random() * 360, y: Math.random() * -300, speed: 2 + Math.random() * 2 });
+      }
+
+      document.addEventListener('keydown', moveBasket);
+
+      function moveBasket(e) {
+        if (e.key === 'ArrowLeft' && basket.x > 0) basket.x -= 20;
+        if (e.key === 'ArrowRight' && basket.x + basket.width < 400) basket.x += 20;
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, 400, 300);
+        ctx.fillStyle = '#f06292';
+        ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+        ctx.fillStyle = 'red';
+        hearts.forEach(heart => {
+          ctx.font = '20px Arial';
+          ctx.fillText('❤️', heart.x, heart.y);
+          heart.y += heart.speed;
+          if (heart.y + 20 > basket.y && heart.x > basket.x && heart.x < basket.x + basket.width) {
+            score++;
+            heart.y = -20;
+            heart.x = Math.random() * 360;
+          }
+          if (heart.y > 300) {
+            heart.y = -20;
+            heart.x = Math.random() * 360;
+          }
+        });
+        ctx.fillStyle = '#000';
+        ctx.fillText("Score: " + score, 10, 20);
+        if (score >= 15) {
+          alert("Thank you for playing 💕");
+        } else {
+          requestAnimationFrame(draw);
+        }
+      }
+      draw();
+    }
+
+    // Tic Tac Toe Game (Mobile)
+    function launchTicTacToe() {
+      document.getElementById('gameTitle').textContent = '❌⭕ Tic Tac Toe vs Computer';
+      const boardDiv = document.getElementById('ticTacToeBoard');
+      boardDiv.style.display = 'grid';
+      let board = Array(9).fill('');
+
+      function checkWinner(b, p) {
+        const winCombos = [
+          [0,1,2],[3,4,5],[6,7,8],
+          [0,3,6],[1,4,7],[2,5,8],
+          [0,4,8],[2,4,6]
+        ];
+        return winCombos.some(c => c.every(i => b[i] === p));
+      }
+
+      function render() {
+        boardDiv.innerHTML = '';
+        board.forEach((val, i) => {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.textContent = val;
+          cell.onclick = () => move(i);
+          boardDiv.appendChild(cell);
+        });
+      }
+
+      function move(i) {
+        if (board[i] !== '') return;
+        board[i] = 'X';
+        if (checkWinner(board, 'X')) {
+          render();
+          alert('Thank you for playing 💕');
+          return;
+        }
+        const empty = board.map((v, idx) => v === '' ? idx : null).filter(v => v !== null);
+        if (empty.length === 0) {
+          render();
+          alert('Thank you for playing 💕');
+          return;
+        }
+        const computerMove = empty[Math.floor(Math.random() * empty.length)];
+        board[computerMove] = 'O';
+        if (checkWinner(board, 'O')) {
+          render();
+          alert('Thank you for playing 💕');
+          return;
+        }
+        render();
+      }
+      render();
+    }
+  </script></body>
+</html>
